@@ -214,5 +214,8 @@ namespace KakeiboApp
         }
 
         #endregion
+
+        #region 表示を「選んだ年月の分」に更新するメソッド
+        #endregion
     }
 }

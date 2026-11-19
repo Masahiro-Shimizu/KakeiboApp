@@ -1,4 +1,3 @@
-using Microsoft.VisualBasic;
 using System.ComponentModel;
 using System.Text.Json;
 
@@ -28,12 +27,15 @@ namespace KakeiboApp
         {
             InitializeComponent();
             // この画面はこの帳簿を映してね とつなぐ
-            recordsDataGridView.DataSource = records;
+            recordsDataGridView.DataSource = selectedRecords;
             // 列名が英語のままなので日本語にする
             SetupColumns();
 
             // JSONファイルからデータを読み込む
             LoadRecords();
+
+            // 表示を「選んだ年月の分」に更新するメソッド
+            RefreshDisplay();
 
             // 読み込んだデータで合計を表示する
             UpdateSummary();
@@ -64,6 +66,7 @@ namespace KakeiboApp
                 Date = dateTimePicker.Value.Date,
                 Category = categoryComboBox.Text,
                 Amount = amount,
+                Shop = shopTextBox.Text,
                 IsIncome = incomeRadioButton.Checked,
                 Memo = memoTextBox.Text
             };
@@ -73,9 +76,12 @@ namespace KakeiboApp
             amountTextBox.Clear();
             memoTextBox.Clear();
             amountTextBox.Focus();
+            shopTextBox.Clear();
 
             // 追加したらすぐに保存する
             SaveRecords();
+
+            RefreshDisplay();
 
             // 収入や支出の合計を計算しなおす
             UpdateSummary();
@@ -132,6 +138,9 @@ namespace KakeiboApp
             // 追加したらすぐに保存する
             SaveRecords();
 
+            // 表示を「選んだ年月の分」に更新するメソッド
+            RefreshDisplay();
+
             // 収入や支出の合計を計算しなおす
             UpdateSummary();
         }
@@ -155,22 +164,64 @@ namespace KakeiboApp
             cols["Memo"].HeaderText = "メモ";
             cols["Kind"].HeaderText = "収支";
             cols["IsIncome"].Visible = false; // IsIncome列は非表示
+            cols["Shop"].HeaderText = "お店";
         }
 
         // 収入・支出・残高を計算して表示
         private void UpdateSummary()
         {
-            // records.Where(r => r.IsIncome)は「帳簿から収入の行だけ取り出す」、.Sum(r => r.Amount)はその金額を合計する
+            // 今月
+            // selectedRecords.Where(r => r.IsIncome)は「帳簿から収入の行だけ取り出す」、.Sum(r => r.Amount)はその金額を合計する
             // r => ... は「1件ずつ r と呼んで、こう判定・計算する」という書き方(ラムダ式)
-            int income = records.Where(r => r.IsIncome).Sum(r => r.Amount);
-            int expense = records.Where(r => !r.IsIncome).Sum(r => r.Amount);
-            int balance = income - expense;
+            int monthIncome = selectedRecords.Where(r => r.IsIncome).Sum(r => r.Amount);
+            int monthExpense = selectedRecords.Where(r => !r.IsIncome).Sum(r => r.Amount);
+            int monthBalance = monthIncome - monthExpense;
 
-            summaryLabel.Text = $"収入 {income:N0}円 支出 {expense:N0}円 残高 {balance:N0}円";
+            summaryLabel.Text = $"今月　収入 {monthIncome:N0}円 支出 {monthExpense:N0}円 残高 {monthBalance:N0}円";
+
+            // 今年　帳簿(records)から、日付の年が見ている月(currentMonth)の年と同じものを拾う
+            //var monthRecords = records.Where(r => r.Date.Year == currentMonth.Year)
+            //int yearIncome = records.Where(r => r.Date.Year == currentMonth.Year).Where(r => r.IsIncome).Sum(r => r.Amount);
+            //int yearExpense = records.Where(r => r.Date.Year == currentMonth.Year).Where(r => !r.IsIncome).Sum(r => r.Amount);
+
+            // 上でもいいが、下のほうが短くて読みやすい
+            // まず、帳簿からその年の分だけを拾って箱に入れておく
+            var yearsRecords = records.Where(r => r.Date.Year == currentMonth.Year);
+            // その箱から、収入だけ・支出だけを拾って合計する
+            int yearIncome = yearsRecords.Where(r => r.IsIncome).Sum(r => r.Amount);
+            int yearExpense = yearsRecords.Where(r => !r.IsIncome).Sum(r => r.Amount);
+            int yearBalance = yearIncome - yearExpense;
+
+            yearSummaryLabel.Text = $"{currentMonth.Year}年　収入 {yearIncome:N0}円 支出 {yearExpense:N0}円 残高 {yearBalance:N0}円";
+
+            // 全期間
+            int totalIncome = records.Where(r => r.IsIncome).Sum(r => r.Amount);
+            int totalExpense = records.Where(r => !r.IsIncome).Sum(r => r.Amount);
+            int totalBalance = totalIncome - totalExpense;
+
+            totalSummaryLabel.Text = $"全期間　収入 {totalIncome:N0}円 支出 {totalExpense:N0}円 残高 {totalBalance:N0}円";
+
+
         }
 
-        // 月別の絞り込み集計
-        // 画面にどんな部品があるか　
+        // 表示を「選んだ年月の分」に更新するメソッド
+        private void RefreshDisplay()
+        {
+            // 表示用の一覧をクリアする
+            selectedRecords.Clear();
+
+            // 帳簿から選んだ年月の分を拾ってくる
+            // 「r の日付の年 == 今見ている月の年 かつ r の日付の月 == 今見ている月の月」
+            var monthRecords = records.Where(r => r.Date.Year == currentMonth.Year && r.Date.Month == currentMonth.Month)
+            // 拾って来た中身を日付順に並び変える
+            // records.Where(条件).OrderBy(何の順番か)
+            .OrderBy(r => r.Date);
+            // 表示用の一覧に入れなおす
+            foreach (var item in monthRecords)
+            {
+                selectedRecords.Add(item);
+            }
+        }
 
         #endregion
 
@@ -196,12 +247,12 @@ namespace KakeiboApp
             {
                 return;
             }
-            
-            foreach(var record in loadedRecords)
+
+            foreach (var record in loadedRecords)
             {
                 records.Add(record);
             }
-            
+
         }
 
         // 保存用のメソッド
@@ -215,7 +266,35 @@ namespace KakeiboApp
 
         #endregion
 
-        #region 表示を「選んだ年月の分」に更新するメソッド
+        #region 
         #endregion
+
+        // 日づけを選択した時の処理
+        private void monthPicker_ValueChanged(object sender, EventArgs e)
+        {
+            // ピッカーで選ばれた年月を currentMonth に入れる(1日にそろえる)→ RefreshDisplay → 合計も更新
+            currentMonth = new DateTime(monthPicker.Value.Year, monthPicker.Value.Month, 1);
+
+            // 表示を「選んだ年月の分」に更新するメソッド
+            RefreshDisplay();
+
+            // 収入や支出の合計を計算しなおす
+            UpdateSummary();
+        }
+
+        private void prevMonthButton_Click(object sender, EventArgs e)
+        {
+            monthPicker.Value = monthPicker.Value.AddMonths(-1);
+        }
+
+        private void nextMonthButton_Click(object sender, EventArgs e)
+        {
+            monthPicker.Value = monthPicker.Value.AddMonths(1);
+        }
+
+        private void dateTimePicker_Enter(object sender, EventArgs e)
+        {
+            this.guideLabel.Text = "カレンダーマークを押して日付を選択してください。";
+        }
     }
 }

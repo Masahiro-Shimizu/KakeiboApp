@@ -56,6 +56,7 @@
             shopLabel = new Label();
             shopTextBox = new TextBox();
             inputTableLayoutPanel = new TableLayoutPanel();
+            updateButton = new Button();
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)recordsDataGridView).BeginInit();
             inputTableLayoutPanel.SuspendLayout();
@@ -101,11 +102,12 @@
             categoryComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             categoryComboBox.Font = new Font("Yu Gothic UI", 18F, FontStyle.Regular, GraphicsUnit.Point, 128);
             categoryComboBox.FormattingEnabled = true;
-            categoryComboBox.Items.AddRange(new object[] { "食費", "日用品", "交通費", "光熱費", "通信費", "娯楽", "給料", "その他" });
+            categoryComboBox.Items.AddRange(new object[] { "食費", "生活用品費", "交際費", "交通費", "衣服費", "教養娯楽費", "医療費", "特別費", "通信費", "車両費", "住居費", "水道光熱費", "税金・社会保険料", "保険料", "給料", "年金", "その他の収入" });
             categoryComboBox.Location = new Point(477, 81);
             categoryComboBox.Name = "categoryComboBox";
             categoryComboBox.Size = new Size(468, 73);
             categoryComboBox.TabIndex = 4;
+            categoryComboBox.Enter += categoryComboBox_Enter;
             // 
             // categoryLabel
             // 
@@ -135,6 +137,7 @@
             memoTextBox.Name = "memoTextBox";
             memoTextBox.Size = new Size(471, 71);
             memoTextBox.TabIndex = 9;
+            memoTextBox.Enter += memoTextBox_Enter;
             // 
             // incomeRadioButton
             // 
@@ -146,6 +149,7 @@
             incomeRadioButton.TabIndex = 10;
             incomeRadioButton.Text = "収入";
             incomeRadioButton.UseVisualStyleBackColor = true;
+            incomeRadioButton.Enter += incomeRadioButton_Enter;
             // 
             // expenseRadioButton
             // 
@@ -159,6 +163,7 @@
             expenseRadioButton.TabStop = true;
             expenseRadioButton.Text = "支出";
             expenseRadioButton.UseVisualStyleBackColor = true;
+            expenseRadioButton.Enter += incomeRadioButton_Enter;
             // 
             // recordsDataGridView
             // 
@@ -190,6 +195,7 @@
             recordsDataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             recordsDataGridView.Size = new Size(2361, 671);
             recordsDataGridView.TabIndex = 12;
+            recordsDataGridView.CellClick += recordsDataGridView_CellClick;
             // 
             // dateTimePicker
             // 
@@ -213,6 +219,7 @@
             addButton.Text = "追加";
             addButton.UseVisualStyleBackColor = true;
             addButton.Click += addButton_Click;
+            addButton.Enter += addButton_Enter;
             // 
             // summaryLabel
             // 
@@ -244,12 +251,13 @@
             amountTextBox.Name = "amountTextBox";
             amountTextBox.Size = new Size(468, 71);
             amountTextBox.TabIndex = 17;
+            amountTextBox.Enter += amountTextBox_Enter;
             // 
             // deleteButton
             // 
             deleteButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             deleteButton.Font = new Font("Yu Gothic UI", 18F, FontStyle.Regular, GraphicsUnit.Point, 128);
-            deleteButton.Location = new Point(1912, 440);
+            deleteButton.Location = new Point(1668, 438);
             deleteButton.Name = "deleteButton";
             deleteButton.Size = new Size(225, 75);
             deleteButton.TabIndex = 18;
@@ -342,6 +350,7 @@
             shopTextBox.Name = "shopTextBox";
             shopTextBox.Size = new Size(468, 71);
             shopTextBox.TabIndex = 26;
+            shopTextBox.Enter += shopTextBox_Enter;
             // 
             // inputTableLayoutPanel
             // 
@@ -370,11 +379,25 @@
             inputTableLayoutPanel.Size = new Size(2373, 164);
             inputTableLayoutPanel.TabIndex = 27;
             // 
+            // updateButton
+            // 
+            updateButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            updateButton.Enabled = false;
+            updateButton.Font = new Font("Yu Gothic UI", 18F, FontStyle.Regular, GraphicsUnit.Point, 128);
+            updateButton.Location = new Point(1922, 438);
+            updateButton.Name = "updateButton";
+            updateButton.Size = new Size(215, 76);
+            updateButton.TabIndex = 28;
+            updateButton.Text = "更新";
+            updateButton.UseVisualStyleBackColor = true;
+            updateButton.Click += updateButton_Click;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(13F, 32F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(2441, 1556);
+            Controls.Add(updateButton);
             Controls.Add(inputTableLayoutPanel);
             Controls.Add(yearSummaryLabel);
             Controls.Add(guideLabel);
@@ -430,5 +453,6 @@
         private Label shopLabel;
         private TextBox shopTextBox;
         private TableLayoutPanel inputTableLayoutPanel;
+        private Button updateButton;
     }
 }

@@ -39,6 +39,8 @@ namespace KakeiboApp
 
             // 読み込んだデータで合計を表示する
             UpdateSummary();
+
+            this.guideLabel.Text = "支出が選ばれています。お金が入ったときは『収入』を選んでください";
         }
         #endregion
 
@@ -72,6 +74,9 @@ namespace KakeiboApp
             };
             records.Add(record);
 
+            //monthPicker.Value = dateTimePicker.Value.Date;
+            monthPicker.Value = record.Date;
+
             // 入力欄をクリア
             amountTextBox.Clear();
             memoTextBox.Clear();
@@ -85,6 +90,8 @@ namespace KakeiboApp
 
             // 収入や支出の合計を計算しなおす
             UpdateSummary();
+
+            this.guideLabel.Text = "追加しました。";
         }
 
         private void deleteButton_Click(object sender, EventArgs e)
@@ -143,6 +150,8 @@ namespace KakeiboApp
 
             // 収入や支出の合計を計算しなおす
             UpdateSummary();
+
+            this.guideLabel.Text = "削除しました。";
         }
 
 
@@ -294,7 +303,141 @@ namespace KakeiboApp
 
         private void dateTimePicker_Enter(object sender, EventArgs e)
         {
-            this.guideLabel.Text = "カレンダーマークを押して日付を選択してください。";
+            this.guideLabel.Text = "カレンダーマークを押して日付を選択してね。";
+        }
+
+        private void categoryComboBox_Enter(object sender, EventArgs e)
+        {
+            this.guideLabel.Text = "支出なら何に使ったか(食費、生活用品等)、収入ならどこから入ったかを選択してね。";
+        }
+
+        private void amountTextBox_Enter(object sender, EventArgs e)
+        {
+            this.guideLabel.Text = "金額を数字で入力してね。";
+        }
+
+        private void shopTextBox_Enter(object sender, EventArgs e)
+        {
+            this.guideLabel.Text = "お店の名前を入力してね。(書かなくても大丈夫)";
+        }
+
+        private void memoTextBox_Enter(object sender, EventArgs e)
+        {
+            this.guideLabel.Text = "メモしておきたい事を入力してね。(書かなくても大丈夫)";
+        }
+
+        private void addButton_Enter(object sender, EventArgs e)
+        {
+            this.guideLabel.Text = "入力内容に間違えがなければ『追加』を押してね。";
+        }
+
+        private void incomeRadioButton_Enter(object sender, EventArgs e)
+        {
+            this.guideLabel.Text = "お金が入ったときは『収入』、使ったときは『支出』を選んでね";
+        }
+
+        private void recordsDataGridView_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            // 選択した行の値が各入力欄に表示される
+            Record? selectedRecord = recordsDataGridView.CurrentRow.DataBoundItem as Record;
+            // nullチェックを入れる場合
+            if (selectedRecord == null)
+            {
+                return;
+            }
+
+            // レコードの中身を書き換える
+            //Date = dateTimePicker.Value.Date,
+            dateTimePicker.Value = selectedRecord.Date;
+            //Category = categoryComboBox.Text,
+            categoryComboBox.Text = selectedRecord.Category;
+            //Amount = amount,
+            amountTextBox.Text = selectedRecord.Amount.ToString();
+            //Shop = shopTextBox.Text,
+            shopTextBox.Text = selectedRecord.Shop;
+            //IsIncome = incomeRadioButton.Checked,
+            incomeRadioButton.Checked = selectedRecord.IsIncome;
+            expenseRadioButton.Checked = !selectedRecord.IsIncome;
+
+            //Memo = memoTextBox.Text
+            memoTextBox.Text = selectedRecord.Memo;
+
+        }
+
+        private void updateButton_Click(object sender, EventArgs e)
+        {
+            // 行が選ばれているかチェック
+            if (recordsDataGridView.CurrentRow == null) //メモ Selectedはその行が選択されているかのtrue/falseで表すbool型 boolはnullにならないから常にfalseになる
+            {
+                MessageBox.Show("更新する項目を選択してください", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // 選ばれた行のRecordを取り出す
+            Record? selectedRecord = recordsDataGridView.CurrentRow.DataBoundItem as Record;
+
+            // nullチェックを入れる
+            if (selectedRecord == null)
+            {
+                MessageBox.Show("更新する項目を選択してください", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // 入力チェック:カテゴリーと金額
+            if (categoryComboBox.SelectedIndex < 0)
+            {
+                MessageBox.Show("カテゴリを選択してください。");
+                return;
+            }
+
+            // 文字を数値に変換出来たらtrue、できなかったらfalseで返す
+            if (!int.TryParse(amountTextBox.Text, out int amount) || amount <= 0) // outは「結果をこの変数に入れて返すよ」という意味
+            {
+                MessageBox.Show("金額は1以上の数値を入力してください。");
+                return;
+            }
+
+            //if (amountTextBox.Text == null)
+            //{
+            //    MessageBox.Show("金額を入力してください。");
+            //    return;
+            //}
+
+            // 取り出したRecordの中身を、入力欄の値で書き換える
+            // 行をクリックしたとき:入力欄 = selectedRecord.プロパティ;
+            //更新ボタン: selectedRecord.プロパティ = 入力欄;
+            //Date = dateTimePicker.Value.Date,
+            selectedRecord.Date = dateTimePicker.Value.Date;
+            //Category = categoryComboBox.Text,
+            selectedRecord.Category = categoryComboBox.Text;
+            //Amount = amount,
+            selectedRecord.Amount = amount;
+            //Shop = shopTextBox.Text,
+            selectedRecord.Shop = shopTextBox.Text;
+            //IsIncome = incomeRadioButton.Checked,
+            selectedRecord.IsIncome = incomeRadioButton.Checked;
+            //!selectedRecord.IsIncome = expenseRadioButton.Checked;
+            //Memo = memoTextBox.Text
+            selectedRecord.Memo = memoTextBox.Text;
+
+            monthPicker.Value = selectedRecord.Date;
+
+            // 入力欄をクリア
+            amountTextBox.Clear();
+            memoTextBox.Clear();
+            amountTextBox.Focus();
+            shopTextBox.Clear();
+
+            // 更新したらすぐに保存する
+            SaveRecords();
+
+            RefreshDisplay();
+
+            // 収入や支出の合計を計算しなおす
+            UpdateSummary();
+
+            this.guideLabel.Text = "更新しました。";
+            
         }
     }
 }

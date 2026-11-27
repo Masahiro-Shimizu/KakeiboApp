@@ -92,6 +92,9 @@ namespace KakeiboApp
             UpdateSummary();
 
             this.guideLabel.Text = "追加しました。";
+
+            updateButton.Enabled = false;
+            cancelButton.Enabled = false;
         }
 
         private void deleteButton_Click(object sender, EventArgs e)
@@ -152,6 +155,10 @@ namespace KakeiboApp
             UpdateSummary();
 
             this.guideLabel.Text = "削除しました。";
+
+            addButton.Enabled = true;
+            updateButton.Enabled = false;
+            cancelButton.Enabled = false;
         }
 
 
@@ -338,6 +345,11 @@ namespace KakeiboApp
 
         private void recordsDataGridView_CellClick(object sender, DataGridViewCellEventArgs e)
         {
+            if (recordsDataGridView.CurrentRow == null) //メモ Selectedはその行が選択されているかのtrue/falseで表すbool型 boolはnullにならないから常にfalseになる
+            {
+                return;
+            }
+
             // 選択した行の値が各入力欄に表示される
             Record? selectedRecord = recordsDataGridView.CurrentRow.DataBoundItem as Record;
             // nullチェックを入れる場合
@@ -361,6 +373,12 @@ namespace KakeiboApp
 
             //Memo = memoTextBox.Text
             memoTextBox.Text = selectedRecord.Memo;
+
+            addButton.Enabled = false;
+            updateButton.Enabled = true;
+            cancelButton.Enabled = true;
+
+            this.guideLabel.Text = "編集中だよ。直したら『更新』、やめるときは『入力をやめる』を押してね";
 
         }
 
@@ -393,7 +411,6 @@ namespace KakeiboApp
             // 文字を数値に変換出来たらtrue、できなかったらfalseで返す
             if (!int.TryParse(amountTextBox.Text, out int amount) || amount <= 0) // outは「結果をこの変数に入れて返すよ」という意味
             {
-                MessageBox.Show("金額は1以上の数値を入力してください。");
                 return;
             }
 
@@ -437,7 +454,36 @@ namespace KakeiboApp
             UpdateSummary();
 
             this.guideLabel.Text = "更新しました。";
-            
+
+            addButton.Enabled = true;
+            updateButton.Enabled = false;
+            cancelButton.Enabled = false;
+
+        }
+
+        private void cancelButton_Click(object sender, EventArgs e)
+        {
+            // 入力欄をクリア
+            amountTextBox.Clear();
+            memoTextBox.Clear();
+            amountTextBox.Focus();
+            shopTextBox.Clear();
+
+            // ボタンを元に戻す
+            addButton.Enabled = true;
+            updateButton.Enabled = false;
+            cancelButton.Enabled = false;
+
+            // 日付を今日の日付に戻す
+            dateTimePicker.Value = DateTime.Today;
+
+            // カテゴリーをクリアする
+            categoryComboBox.SelectedIndex = -1;
+            // 収入 / 支出:支出に戻す
+            expenseRadioButton.Checked = true;
+
+            // 案内ラベルに表示する
+            this.guideLabel.Text = "編集モードを取り消したよ";
         }
     }
 }

@@ -57,6 +57,7 @@
             shopTextBox = new TextBox();
             inputTableLayoutPanel = new TableLayoutPanel();
             updateButton = new Button();
+            cancelButton = new Button();
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)recordsDataGridView).BeginInit();
             inputTableLayoutPanel.SuspendLayout();
@@ -392,11 +393,25 @@
             updateButton.UseVisualStyleBackColor = true;
             updateButton.Click += updateButton_Click;
             // 
+            // cancelButton
+            // 
+            cancelButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            cancelButton.Enabled = false;
+            cancelButton.Font = new Font("Yu Gothic UI", 18F, FontStyle.Regular, GraphicsUnit.Point, 128);
+            cancelButton.Location = new Point(1250, 442);
+            cancelButton.Name = "cancelButton";
+            cancelButton.Size = new Size(373, 76);
+            cancelButton.TabIndex = 29;
+            cancelButton.Text = "入力をやめる";
+            cancelButton.UseVisualStyleBackColor = true;
+            cancelButton.Click += cancelButton_Click;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(13F, 32F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(2441, 1556);
+            Controls.Add(cancelButton);
             Controls.Add(updateButton);
             Controls.Add(inputTableLayoutPanel);
             Controls.Add(yearSummaryLabel);
@@ -454,5 +469,6 @@
         private TextBox shopTextBox;
         private TableLayoutPanel inputTableLayoutPanel;
         private Button updateButton;
+        private Button cancelButton;
     }
 }
